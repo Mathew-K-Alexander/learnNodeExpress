@@ -6,6 +6,21 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('dist'));
 
+const mongoose = require('mongoose');
+
+const password = process.argv[2];
+const url = `mongodb+srv://fullstack:${password}@cluster0.a5qfl.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`;
+
+mongoose.set('strictQuery', false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+});
+
+const Note = mongoose.model('Note', noteSchema);
+
 let notes = [
   {
     id: '1',
@@ -29,7 +44,9 @@ app.get('/', (request, response) => {
 });
 
 app.get('/api/notes', (requests, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.delete('/api/notes/:id', (request, response) => {
